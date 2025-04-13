@@ -1,4 +1,16 @@
+# .prettierrc.yaml
 singleQuote: true
 semi: false
 printWidth: 100
 trailingComma: none
+
+overrides:
+  - files: '*.vue'
+    options:
+      tabWidth: 4
+  - files: '*.less'
+    options:
+      tabWidth: 4
+  - files: '*.js'
+    options:
+      tabWidth: 4

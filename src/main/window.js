@@ -4,33 +4,45 @@ import { is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
 export function createWindow() {
-  const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
-    show: false,
-    autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+    const mainWindow = new BrowserWindow({
+        width: 860,
+        height: 580,
+        show: false,
+        autoHideMenuBar: true,
+        frame: 'hidden',
+        titleBarStyle: 'hidden',
+        hasShadow: true,
+        resizable: false,
+        ...(process.platform === 'linux' ? { icon } : {}),
+        webPreferences: {
+            preload: join(__dirname, '../preload/index.js'),
+            sandbox: false
+        }
+    })
+
+    mainWindow.on('ready-to-show', () => {
+        mainWindow.show()
+    })
+
+    mainWindow.webContents.setWindowOpenHandler((details) => {
+        shell.openExternal(details.url)
+
+        return { action: 'deny' }
+    })
+
+    if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+        mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
+    } else {
+        mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
     }
-  })
 
-  mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
-  })
+    // 禁用标题栏右键菜单
+    mainWindow.hookWindowMessage(0x116, () => {
+        mainWindow.setEnabled(false)
+        setTimeout(() => {
+            mainWindow.setEnabled(true)
+        }, 50)
+    })
 
-  mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
-
-    return { action: 'deny' }
-  })
-
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-  } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
-  }
-
-  return mainWindow
+    return mainWindow
 }

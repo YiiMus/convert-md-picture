@@ -1,5 +1,7 @@
+import { ipcRenderer } from 'electron'
+
 export const api = {
-  ping: () => {
-    console.log('ping from renderer')
-  }
+    ping: () => {
+        ipcRenderer.send('ping', 1)
+    }
 }

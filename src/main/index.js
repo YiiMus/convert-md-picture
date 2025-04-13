@@ -4,23 +4,22 @@ import { createWindow } from './window'
 import { setupIPC } from './ipc'
 
 app.whenReady().then(() => {
-  electronApp.setAppUserModelId('com.nanoopic')
+    electronApp.setAppUserModelId('com.nanoopic')
 
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
-  })
+    app.on('browser-window-created', (_, window) => {
+        optimizer.watchWindowShortcuts(window)
+    })
 
-  createWindow()
+    setupIPC()
+    createWindow()
 
-  app.on('activate', function () {
-    if (app.getAllWindows().length === 0) createWindow()
-  })
+    app.on('activate', function () {
+        if (app.getAllWindows().length === 0) createWindow()
+    })
 
-  app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-      app.quit()
-    }
-  })
-
-  setupIPC()
+    app.on('window-all-closed', () => {
+        if (process.platform !== 'darwin') {
+            app.quit()
+        }
+    })
 })
