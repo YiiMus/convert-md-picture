@@ -1,4 +1,4 @@
-appId: com.electron.app
+appId: com.nanoopic.convert-md-picture
 productName: convert-md-picture
 directories:
   buildResources: build
