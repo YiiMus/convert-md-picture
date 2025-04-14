@@ -24,7 +24,7 @@ export default [
     rules: {
       'vue/require-default-prop': 'off',
       'vue/multi-word-component-names': 'off',
-      'prettier/prettier': ['error', { tabWidth: 4 }]
+      'prettier/prettier': ['error', { tabWidth: 4, printWidth: 110 }]
     }
   },
   eslintConfigPrettier

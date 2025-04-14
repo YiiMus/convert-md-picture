@@ -1,7 +1,11 @@
 import { ipcRenderer } from 'electron'
 
 export const api = {
-    ping: () => {
-        ipcRenderer.send('ping', 1)
-    }
+    minimize: () => {
+        ipcRenderer.send('minimize')
+    },
+    closeApp: () => {
+        ipcRenderer.send('closeApp')
+    },
+    getPackageJson: () => ipcRenderer.invoke('getPackageJson')
 }
