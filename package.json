@@ -21,7 +21,8 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^4.0.0",
-    "ant-design-vue": "4.x"
+    "ant-design-vue": "4.x",
+    "vue-i18n": "10"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config": "^2.0.0",

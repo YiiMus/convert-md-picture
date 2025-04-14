@@ -2,8 +2,12 @@
     <div class="title">
         <div class="title-box">{{ appName }}</div>
         <div class="btn-box">
-            <a-button type="text" class="btn minus" @click="handleMinus"><MinusOutlined /></a-button>
-            <a-button type="text" class="btn close" @click="handleClose"><CloseOutlined /></a-button>
+            <a-button type="text" class="btn" :title="$t('header.btn.minusTitle')" @click="handleMinus"
+                ><MinusOutlined
+            /></a-button>
+            <a-button type="text" class="btn close" :title="$t('header.btn.closeTitle')" @click="handleClose"
+                ><CloseOutlined
+            /></a-button>
         </div>
     </div>
 </template>
