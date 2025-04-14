@@ -1,4 +1,5 @@
 {
+    "header.loading": "加载中...",
     "header.btn.minusTitle": "最小化窗口",
     "header.btn.closeTitle": "关闭应用"
 }

@@ -15,8 +15,11 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { CloseOutlined, MinusOutlined } from '@ant-design/icons-vue'
+import { useI18n } from 'vue-i18n'
 
-const appName = ref('Loading...')
+const { t } = useI18n()
+
+const appName = ref(t('header.loading'))
 
 onMounted(async () => {
     const packageJson = await window.api.getPackageJson()
