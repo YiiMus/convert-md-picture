@@ -39,7 +39,7 @@ const handleClose = () => {
 .title {
     position: relative;
     width: 100%;
-    height: 40px;
+    height: 34px;
     display: flex;
     align-items: center;
     -webkit-app-region: drag;

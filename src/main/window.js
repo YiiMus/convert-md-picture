@@ -10,6 +10,7 @@ export function createWindow() {
         show: false,
         center: true,
         fullscreen: false,
+        transparent: true,
         fullscreenable: false,
         autoHideMenuBar: true,
         frame: false,
