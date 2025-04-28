@@ -8,6 +8,8 @@ import 'ant-design-vue/dist/reset.css'
 import i18n from './i18n'
 // vue-router
 import router from './router'
+// Element Plus
+import 'element-plus/dist/index.css'
 
 const app = createApp(App)
 
