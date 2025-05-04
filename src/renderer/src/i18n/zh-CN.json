@@ -1,5 +1,8 @@
 {
     "header.loading": "加载中...",
     "header.btn.minusTitle": "最小化窗口",
-    "header.btn.closeTitle": "关闭应用"
+    "header.btn.closeTitle": "关闭应用",
+    "router.convert": "图链转换",
+    "router.setting": "转换设置",
+    "router.about": "关于应用"
 }

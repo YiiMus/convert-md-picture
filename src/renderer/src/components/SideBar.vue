@@ -5,13 +5,20 @@
                 <template #icon><UserOutlined /></template>
             </a-avatar>
         </div>
-        <div class="action-list">
-            <el-scrollbar>
-                <a-list item-layout="horizontal" :data-source="data">
+        <div class="router-list">
+            <el-scrollbar :data="routerList">
+                <a-list item-layout="horizontal" :data-source="routerList">
                     <template #renderItem="{ item }">
-                        <a-list-item>
-                            {{ item.title }}
-                        </a-list-item>
+                        <div class="router-box">
+                            <v-btn
+                                :prepend-icon="item.icon"
+                                :variant="item.path === activeRoute ? 'tonal' : 'text'"
+                                rounded="lg"
+                                @click="handleClick(item.path)"
+                            >
+                                {{ item.title }}</v-btn
+                            >
+                        </div>
                     </template>
                 </a-list>
             </el-scrollbar>
@@ -20,19 +27,37 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { UserOutlined } from '@ant-design/icons-vue'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
-const data = [
+const { t } = useI18n()
+const router = useRouter()
+const activeRoute = ref('/')
+
+const routerList = [
     {
-        title: 'Ant Design Title 1'
+        icon: 'mdi-panorama-variant',
+        title: t('router.convert'),
+        path: '/'
     },
     {
-        title: 'Ant Design Title 2'
+        icon: 'mdi-file-settings',
+        title: t('router.setting'),
+        path: '/setting'
     },
     {
-        title: 'Ant Design Title 3'
+        icon: 'mdi-information-variant-box',
+        title: t('router.about'),
+        path: '/about'
     }
 ]
+
+const handleClick = (path) => {
+    router.push(path)
+    activeRoute.value = path
+}
 </script>
 
 <style lang="less" scoped>
@@ -52,11 +77,26 @@ const data = [
         align-items: center;
     }
 
-    .action-list {
+    .router-list {
         width: 100%;
         flex: 1;
         overflow-y: auto;
         overflow-x: hidden;
+
+        .router-box {
+            padding: 4px 12px;
+
+            .v-btn {
+                width: 100%;
+                height: 48px;
+                display: flex;
+                align-items: center;
+                flex-wrap: nowrap;
+                justify-content: space-evenly;
+                font-size: 16px;
+                font-weight: 400;
+            }
+        }
     }
 }
 </style>

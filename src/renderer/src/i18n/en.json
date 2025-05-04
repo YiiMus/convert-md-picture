@@ -1,5 +1,8 @@
 {
     "header.loading": "Loading...",
     "header.btn.minusTitle": "Minimize window",
-    "header.btn.closeTitle": "Close the application"
+    "header.btn.closeTitle": "Close the application",
+    "router.convert": "Convert",
+    "router.setting": "Setting",
+    "router.about": "About"
 }
