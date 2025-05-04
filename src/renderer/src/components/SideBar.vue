@@ -12,7 +12,7 @@
                         <div class="router-box">
                             <v-btn
                                 :prepend-icon="item.icon"
-                                :variant="item.path === activeRoute ? 'tonal' : 'text'"
+                                :variant="item.path === appInfoStore.activeRoute ? 'tonal' : 'text'"
                                 rounded="lg"
                                 @click="handleClick(item.path)"
                             >
@@ -29,12 +29,13 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
 import { UserOutlined } from '@ant-design/icons-vue'
-import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAppInfoStore } from '../stores/appInfo'
+import { onMounted } from 'vue'
+const appInfoStore = useAppInfoStore()
 
 const { t } = useI18n()
 const router = useRouter()
-const activeRoute = ref('/')
 
 const routerList = [
     {
@@ -56,8 +57,16 @@ const routerList = [
 
 const handleClick = (path) => {
     router.push(path)
-    activeRoute.value = path
+
+    const currentTitle = routerList.find((item) => item.path === path).title
+    appInfoStore.handleChangeActiveRoute(path)
+    appInfoStore.handleChangeCurrentTitle(currentTitle)
 }
+
+onMounted(() => {
+    appInfoStore.handleChangeActiveRoute(routerList[0].path)
+    appInfoStore.handleChangeCurrentTitle(routerList[0].title)
+})
 </script>
 
 <style lang="less" scoped>
@@ -93,7 +102,7 @@ const handleClick = (path) => {
                 align-items: center;
                 flex-wrap: nowrap;
                 justify-content: space-evenly;
-                font-size: 16px;
+                font-size: 15px;
                 font-weight: 400;
             }
         }

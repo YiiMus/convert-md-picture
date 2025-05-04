@@ -7,7 +7,7 @@
             <a-layout-header class="transparent-background app-header">
                 <Header />
             </a-layout-header>
-            <a-layout-content class="transparent-background">
+            <a-layout-content class="transparent-background app-content">
                 <router-view />
             </a-layout-content>
         </a-layout>
@@ -17,13 +17,6 @@
 <script setup>
 import Header from './components/Header.vue'
 import SideBar from './components/SideBar.vue'
-// import { useI18n } from 'vue-i18n'
-
-// const { t } = useI18n()
-
-// const handleClick = () => {
-//     console.log(t('header.loading'))
-// }
 </script>
 
 <style lang="css" scoped>
@@ -43,6 +36,10 @@ import SideBar from './components/SideBar.vue'
         padding: 0;
         border-bottom: 1px solid rgb(220, 220, 220);
         background-color: rgb(255, 255, 255);
+    }
+
+    .app-content {
+        background-color: #fff;
     }
 }
 

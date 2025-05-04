@@ -16,8 +16,9 @@ import router from './router'
 import 'element-plus/dist/index.css'
 // Main Style
 import './main.less'
+// Pinia
+import { createPinia } from 'pinia'
 
-const app = createApp(App)
 const vuetify = createVuetify({
     icons: {
         defaultSet: 'mdi',
@@ -27,9 +28,13 @@ const vuetify = createVuetify({
         }
     }
 })
+const pinia = createPinia()
+
+const app = createApp(App)
 
 app.use(Antd)
 app.use(i18n)
 app.use(router)
 app.use(vuetify)
+app.use(pinia)
 app.mount('#app')

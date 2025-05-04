@@ -23,6 +23,7 @@
         "@electron-toolkit/utils": "^4.0.0",
         "ant-design-vue": "4.x",
         "element-plus": "^2.9.9",
+        "pinia": "^3.0.2",
         "vue-i18n": "10",
         "vue-router": "4",
         "vuetify": "^3.8.3"

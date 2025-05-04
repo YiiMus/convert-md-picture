@@ -1,6 +1,8 @@
 <template>
     <div class="title">
-        <div class="title-box">{{ appName }}</div>
+        <div class="title-box">
+            {{ appInfoStore.currentTitle ? appInfoStore.currentTitle : t('header.loading') }}
+        </div>
         <div class="btn-box">
             <a-button type="text" class="btn" :title="$t('header.btn.minusTitle')" @click="handleMinus"
                 ><MinusOutlined
@@ -13,18 +15,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { CloseOutlined, MinusOutlined } from '@ant-design/icons-vue'
 import { useI18n } from 'vue-i18n'
-
+import { CloseOutlined, MinusOutlined } from '@ant-design/icons-vue'
+import { useAppInfoStore } from '../stores/appInfo'
+const appInfoStore = useAppInfoStore()
 const { t } = useI18n()
-
-const appName = ref(t('header.loading'))
-
-onMounted(async () => {
-    const packageJson = await window.api.getPackageJson()
-    appName.value = packageJson.productName || 'ConvertMdPicture'
-})
 
 const handleMinus = () => {
     window.api.minimize()
@@ -39,7 +34,7 @@ const handleClose = () => {
 .title {
     position: relative;
     width: 100%;
-    height: 34px;
+    height: 36px;
     display: flex;
     align-items: center;
     -webkit-app-region: drag;
@@ -47,6 +42,8 @@ const handleClose = () => {
 
 .title-box {
     padding-left: 8px;
+    font-size: 15px;
+    font-weight: 400;
 }
 
 .btn-box {
