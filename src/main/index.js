@@ -11,7 +11,7 @@ app.whenReady().then(() => {
     })
 
     setupIPC()
-    createWindow()
+    const mainWindow = createWindow()
 
     app.on('activate', function () {
         if (app.getAllWindows().length === 0) createWindow()
@@ -22,4 +22,17 @@ app.whenReady().then(() => {
             app.quit()
         }
     })
+
+    const gotTheLock = app.requestSingleInstanceLock()
+
+    if (!gotTheLock) {
+        app.quit()
+    } else {
+        app.on('second-instance', () => {
+            if (mainWindow) {
+                if (mainWindow.isMinimized()) mainWindow.restore()
+                mainWindow.focus()
+            }
+        })
+    }
 })
