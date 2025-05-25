@@ -1,17 +1,35 @@
 import fs from 'fs'
 import path from 'path'
+import axios from 'axios'
+
+// 精确匹配 Markdown 图片语法并保留 alt 和 title
+const imageRegex = /^!\[([^\]]*)\]\(\s*((?:[^()]|\([^)]*\))*)\s*(?:"([^"]*)")?\)/
+
+const handleUpload = async (imageUrl) => {
+    try {
+        const result = await axios.post(
+            'http://127.0.0.1:36677/upload',
+            JSON.stringify({
+                list: [imageUrl]
+            })
+        )
+        return result.data
+    } catch (e) {
+        console.error(e)
+    }
+}
 
 const praseMdImageInfos = (content, mdFilePath) => {
     try {
         const dirName = path.dirname(mdFilePath)
         const imageInfos = []
-        const imageRegex = /!\[(.*?)\]\((.*?)\)/g
         const lines = content.split(/\r?\n/) // 按行分割
 
         for (const [index, line] of lines.entries()) {
-            let match
-            while ((match = imageRegex.exec(line)) !== null) {
-                const imageUrl = match[2]
+            const match = line.match(imageRegex)
+
+            if (match) {
+                const imageUrl = match[2] // 提取括号中的 URL 部分
                 const absolutePath = path.resolve(dirName, imageUrl)
 
                 // 判断是否是网络图片
@@ -27,9 +45,33 @@ const praseMdImageInfos = (content, mdFilePath) => {
         }
 
         return imageInfos
-    } catch (error) {
-        console.error('解析 Markdown 出错:', error)
+    } catch (e) {
+        console.error('解析 Markdown 出错:', e)
+        return []
     }
+}
+
+const replaceLocalImageUrl = (content, successList) => {
+    const lines = content.split(/\r?\n/)
+    const urlMap = new Map(successList.map((item) => [item.lineIndex, item.remoteUrl]))
+
+    for (const [index, line] of lines.entries()) {
+        const match = line.match(imageRegex)
+
+        if (match) {
+            const altText = match[1]
+            const title = match[3] ? ` "${match[3]}"` : ''
+            const remoteUrl = urlMap.get(index)
+
+            if (remoteUrl) {
+                lines[index] = `![${altText}](${remoteUrl}${title})`
+            }
+        }
+    }
+
+    const newContent = lines.join('\n')
+    console.log('newContent: \n', newContent)
+    console.log('end')
 }
 
 const readFile = async (filePath) => {
@@ -47,15 +89,51 @@ const uploadImage = async (event, filePathList = []) => {
 
             // 解析 md 文件中所有的图片信息
             const imageInfos = praseMdImageInfos(content, filePath)
-            console.log('imageInfos', imageInfos)
+            const localImageList = imageInfos.filter((i) => !i.isRemote)
+
+            // 上传结果
+            const uploadResultList = []
+
+            const uploadTasks = localImageList.map((i) => {
+                const task = handleUpload(i.absolutePath)
+                task.then((result) => {
+                    // 通知渲染进程上传进度
+                    uploadResultList.push({
+                        lineIndex: i.lineIndex,
+                        requestResult: result
+                    })
+                    event.sender.send('uploadProgress', {
+                        totalCount: localImageList.length,
+                        uploadedCount: uploadResultList.length
+                    })
+                })
+                return task
+            })
+
+            try {
+                await Promise.all(uploadTasks)
+                console.log(`上传结果:  ${filePath} `, uploadResultList)
+                const successList = uploadResultList
+                    .filter((i) => i?.requestResult?.success)
+                    .map((i) => {
+                        return {
+                            lineIndex: i.lineIndex,
+                            remoteUrl: i.requestResult?.result?.[0] || null
+                        }
+                    })
+                console.log('上传成功的图片：', successList)
+                replaceLocalImageUrl(content, successList)
+            } catch (error) {
+                console.error('上传出错:', error)
+            }
         })
 
         await Promise.all(promises)
 
         event.sender.send('uploadProgress', 'All files processed')
-    } catch (error) {
-        console.error('handleUpload Error:', error)
-        throw error
+    } catch (e) {
+        console.error('handleUpload Error:', e)
+        throw e
     }
 }
 export { uploadImage }

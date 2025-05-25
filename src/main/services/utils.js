@@ -16,8 +16,8 @@ import path from 'path'
 export const getPackageJson = () => {
     try {
         return require(path.join(app.getAppPath(), 'package.json'))
-    } catch (error) {
-        console.error('加载 package.json 失败:', error.message)
+    } catch (e) {
+        console.error('加载 package.json 失败:', e.message)
         return {}
     }
 }
