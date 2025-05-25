@@ -12,14 +12,24 @@
 <script setup>
 // import { useI18n } from 'vue-i18n'
 // const { t } = useI18n()
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 
 const fileList = ref([])
 
 const selectFiles = async () => {
     const selectedFiles = await window.api.selectFiles()
-    fileList.value = selectedFiles
+
+    if (selectedFiles.length > 0) {
+        fileList.value = selectedFiles
+        await window.api.uploadImage(selectedFiles)
+    }
 }
+
+onMounted(async () => {
+    await window.api.onUploadProgress((event, progress) => {
+        console.log('onUploadProgress', progress)
+    })
+})
 </script>
 
 <style lang="less" scoped>

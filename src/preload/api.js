@@ -15,5 +15,11 @@ export const api = {
     getPackageJson: () => ipcRenderer.invoke('getPackageJson'),
 
     // 选择文件
-    selectFiles: () => ipcRenderer.invoke('selectFiles')
+    selectFiles: () => ipcRenderer.invoke('selectFiles'),
+
+    // 上传文件中的本地图片到图床
+    uploadImage: (filePathList) => ipcRenderer.invoke('uploadImage', filePathList),
+
+    // 上传进度
+    onUploadProgress: (callback) => ipcRenderer.on('uploadProgress', callback)
 }

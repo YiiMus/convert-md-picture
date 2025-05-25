@@ -1,5 +1,6 @@
 import { ipcMain, dialog } from 'electron'
 import { getPackageJson } from './services/utils'
+import { uploadImage } from './services/upload'
 
 export function setupIPC() {
     // Close app
@@ -30,5 +31,10 @@ export function setupIPC() {
             filters: [{ name: 'Markdown Files', extensions: ['md'] }]
         })
         return result.filePaths // 返回完整的文件路径数组
+    })
+
+    // 上传文件中的本地图片到图床
+    ipcMain.handle('uploadImage', (event, filePathList) => {
+        uploadImage(event, filePathList)
     })
 }
