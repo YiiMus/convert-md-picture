@@ -4,5 +4,6 @@
     "header.btn.closeTitle": "Close the application",
     "router.convert": "Convert",
     "router.setting": "Setting",
-    "router.about": "About"
+    "router.about": "About",
+    "home.selectFile": "Select file"
 }

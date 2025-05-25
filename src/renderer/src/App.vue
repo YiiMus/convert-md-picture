@@ -8,7 +8,11 @@
                 <Header />
             </a-layout-header>
             <a-layout-content class="transparent-background app-content">
-                <router-view />
+                <router-view v-slot="{ Component, route }">
+                    <keep-alive>
+                        <component :is="Component" :key="route.path" />
+                    </keep-alive>
+                </router-view>
             </a-layout-content>
         </a-layout>
     </a-layout>

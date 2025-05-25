@@ -4,5 +4,6 @@
     "header.btn.closeTitle": "关闭应用",
     "router.convert": "图链转换",
     "router.setting": "转换设置",
-    "router.about": "关于应用"
+    "router.about": "关于应用",
+    "home.selectFile": "选择文件"
 }
