@@ -112,7 +112,13 @@ const uploadImage = async (event, fileList = []) => {
 
             // 解析 md 文件中所有的图片信息
             const imageInfos = praseMdImageInfos(content, filePath)
-            const localImageList = imageInfos.filter((i) => !i.isRemote)
+
+            // 本地图片 - 去重
+            const localImageList = [
+                ...new Map(
+                    imageInfos.filter((i) => !i.isRemote).map((item) => [item.absolutePath, item])
+                ).values()
+            ]
 
             if (content) {
                 // 解析完成
@@ -176,12 +182,34 @@ const uploadImage = async (event, fileList = []) => {
                     })
                 }
 
-                const successList = uploadResultList
+                // 构建 Map：absolutePath -> remoteUrl
+                const pathToRemoteUrl = new Map()
+
+                // 构建所有行索引与远程 URL 的映射（包括重复路径的）
+                const successList = []
+
+                uploadResultList
                     .filter((i) => i?.requestResult?.success)
-                    .map((i) => {
-                        return {
-                            lineIndex: i.lineIndex,
-                            remoteUrl: i.requestResult?.result?.[0] || null
+                    .forEach(({ lineIndex, requestResult }) => {
+                        const item = localImageList.find((i) => i.lineIndex === lineIndex)
+                        if (item) {
+                            const { absolutePath } = item
+
+                            // 第一次遇到这个图片路径，记录远程 URL
+                            if (!pathToRemoteUrl.has(absolutePath)) {
+                                const remoteUrl = requestResult?.result?.[0] || null
+                                pathToRemoteUrl.set(absolutePath, remoteUrl)
+                            }
+
+                            // 找出所有使用这个 absolutePath 的行，并添加到 successList
+                            imageInfos
+                                .filter((i) => !i.isRemote && i.absolutePath === absolutePath)
+                                .forEach((i) => {
+                                    successList.push({
+                                        lineIndex: i.lineIndex,
+                                        remoteUrl: pathToRemoteUrl.get(absolutePath)
+                                    })
+                                })
                         }
                     })
 
