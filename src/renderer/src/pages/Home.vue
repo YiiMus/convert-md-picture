@@ -3,8 +3,16 @@
         <div class="select-box">
             <v-btn @click="selectFiles">{{ $t('home.selectFile') }}</v-btn>
         </div>
+
         <div class="handler-box">
-            <p v-for="(item, index) in fileList" :key="index">{{ item }}</p>
+            <el-scrollbar :data="fileList">
+                <div class="task-list-box">
+                    <a-list item-layout="horizontal" :data-source="fileList">
+                        <template #renderItem="{ item }">
+                            <div><Task :item="item" /></div> </template
+                    ></a-list>
+                </div>
+            </el-scrollbar>
         </div>
     </div>
 </template>
@@ -13,21 +21,39 @@
 // import { useI18n } from 'vue-i18n'
 // const { t } = useI18n()
 import { onMounted, ref } from 'vue'
+import { v4 as uuidV4 } from 'uuid'
+import Task from '../components/Task.vue'
 
 const fileList = ref([])
 
 const selectFiles = async () => {
     const selectedFiles = await window.api.selectFiles()
 
+    const mapList = selectedFiles.map((item) => {
+        return {
+            id: uuidV4(),
+            fileName: item.fileName,
+            filePath: item.filePath,
+            status: 'waiting'
+        }
+    })
+
     if (selectedFiles.length > 0) {
-        fileList.value = selectedFiles
-        await window.api.uploadImage(selectedFiles)
+        // 追加而不是覆盖
+        fileList.value = [...fileList.value, ...mapList]
+
+        await window.api.uploadImage(mapList)
     }
 }
 
 onMounted(async () => {
     await window.api.onUploadProgress((event, progress) => {
-        console.log('onUploadProgress', progress)
+        const index = fileList.value.findIndex((item) => item.id === progress.id)
+
+        if (index > -1) {
+            fileList.value[index].status = progress.status
+            fileList.value[index].data = progress?.data
+        }
     })
 })
 </script>
@@ -36,6 +62,8 @@ onMounted(async () => {
 .home {
     width: 100%;
     height: 100%;
+    display: flex;
+    flex-direction: column;
 
     .select-box {
         width: 100%;
@@ -51,7 +79,20 @@ onMounted(async () => {
         width: 100%;
         position: relative;
         top: 0;
-        height: 100%;
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 1px;
+
+        border-top: 1px solid #e0e0e0;
+        background-color: #fafafa;
+
+        box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.02);
+
+        .task-list-box {
+            width: 100%;
+            height: 100%;
+        }
     }
 }
 </style>

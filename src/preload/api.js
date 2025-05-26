@@ -21,5 +21,10 @@ export const api = {
     uploadImage: (filePathList) => ipcRenderer.invoke('uploadImage', filePathList),
 
     // 上传进度
-    onUploadProgress: (callback) => ipcRenderer.on('uploadProgress', callback)
+    onUploadProgress: (callback) => ipcRenderer.on('uploadProgress', callback),
+
+    // 打开文件夹
+    openFolder: (filePath) => {
+        ipcRenderer.send('openFolder', filePath)
+    }
 }

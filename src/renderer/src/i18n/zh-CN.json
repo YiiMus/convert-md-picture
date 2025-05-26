@@ -5,5 +5,18 @@
     "router.convert": "图链转换",
     "router.setting": "转换设置",
     "router.about": "关于应用",
-    "home.selectFile": "选择文件"
+    "home.selectFile": "选择文件",
+    "task.unKnown": "未知状态",
+    "task.waiting": "等待中",
+    "task.parsing": "解析中",
+    "task.parsed": "解析完成",
+    "task.startUpload": "开始上传",
+    "task.uploading": "上传中",
+    "task.uploaded": "上传完成",
+    "task.building": "构建中",
+    "task.builded": "构建完成",
+    "task.taskFinished": "任务完成",
+    "task.noParsed": "未解析出本地图片",
+    "task.taskCancel": "任务取消",
+    "task.openFolder": "打开文件所在位置"
 }

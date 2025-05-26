@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import axios from 'axios'
+import dayjs from 'dayjs'
 
 // 精确匹配 Markdown 图片语法并保留 alt 和 title
 const imageRegex = /^!\[([^\]]*)\]\(\s*((?:[^()]|\([^)]*\))*)\s*(?:"([^"]*)")?\)/
@@ -51,7 +52,7 @@ const praseMdImageInfos = (content, mdFilePath) => {
     }
 }
 
-const replaceLocalImageUrl = (content, successList) => {
+const replaceLocalImageUrl = (content, successList, filePath, fileName) => {
     const lines = content.split(/\r?\n/)
     const urlMap = new Map(successList.map((item) => [item.lineIndex, item.remoteUrl]))
 
@@ -69,9 +70,23 @@ const replaceLocalImageUrl = (content, successList) => {
         }
     }
 
-    const newContent = lines.join('\n')
-    console.log('newContent: \n', newContent)
-    console.log('end')
+    // 自动识别原始换行符
+    const lineBreak = content.includes('\r\n') ? '\r\n' : '\n'
+    const newContent = lines.join(lineBreak)
+
+    // 构建输出路径
+    const dir = path.dirname(filePath)
+    const [prefix, suffix] = fileName.split('.')
+
+    const timestamp = dayjs().unix() // 获取当前秒级时间戳（Unix 时间戳）
+    const newFileName = `${prefix} - ${timestamp}.${suffix}`
+
+    const outputPath = path.join(dir, newFileName)
+
+    // 写入文件
+    fs.writeFileSync(outputPath, newContent, 'utf-8')
+
+    return outputPath
 }
 
 const readFile = async (filePath) => {
@@ -82,14 +97,31 @@ const readFile = async (filePath) => {
     }
 }
 
-const uploadImage = async (event, filePathList = []) => {
+const uploadImage = async (event, fileList = []) => {
     try {
-        const promises = filePathList.map(async (filePath) => {
+        const promises = fileList.map(async (item) => {
+            const { filePath, id, fileName } = item
+
+            // 解析中
+            event.sender.send('uploadProgress', {
+                id: id,
+                status: 'parsing'
+            })
+
             const content = await readFile(filePath)
 
             // 解析 md 文件中所有的图片信息
             const imageInfos = praseMdImageInfos(content, filePath)
             const localImageList = imageInfos.filter((i) => !i.isRemote)
+
+            if (content) {
+                // 解析完成
+                event.sender.send('uploadProgress', {
+                    id: id,
+                    status: 'parsed',
+                    data: imageInfos
+                })
+            }
 
             // 上传结果
             const uploadResultList = []
@@ -97,22 +129,53 @@ const uploadImage = async (event, filePathList = []) => {
             const uploadTasks = localImageList.map((i) => {
                 const task = handleUpload(i.absolutePath)
                 task.then((result) => {
-                    // 通知渲染进程上传进度
                     uploadResultList.push({
                         lineIndex: i.lineIndex,
                         requestResult: result
                     })
+
+                    // 通知渲染进程上传进度
                     event.sender.send('uploadProgress', {
-                        totalCount: localImageList.length,
-                        uploadedCount: uploadResultList.length
+                        id: id,
+                        status: 'uploading',
+                        data: {
+                            totalCount: localImageList.length,
+                            uploadedCount: uploadResultList.length
+                        }
                     })
                 })
                 return task
             })
 
+            if (uploadTasks?.length > 0) {
+                // 开始上传
+                event.sender.send('uploadProgress', {
+                    id: id,
+                    status: 'startUpload',
+                    data: imageInfos
+                })
+            }
+
             try {
                 await Promise.all(uploadTasks)
-                console.log(`上传结果:  ${filePath} `, uploadResultList)
+
+                // 统计上传结果
+                const successCount = uploadResultList.filter((item) => item.requestResult.success).length
+                const failureCount = uploadResultList.length - successCount
+
+                if (uploadResultList.length === uploadTasks.length && uploadTasks.length > 0) {
+                    // 上传结束
+                    event.sender.send('uploadProgress', {
+                        id: id,
+                        status: 'uploaded',
+                        data: {
+                            totalCount: uploadResultList.length,
+                            successCount: successCount,
+                            failureCount: failureCount
+                        }
+                    })
+                }
+
                 const successList = uploadResultList
                     .filter((i) => i?.requestResult?.success)
                     .map((i) => {
@@ -121,35 +184,46 @@ const uploadImage = async (event, filePathList = []) => {
                             remoteUrl: i.requestResult?.result?.[0] || null
                         }
                     })
-                console.log('上传成功的图片：', successList)
-                replaceLocalImageUrl(content, successList)
+
+                // 输出路径
+                let outputPath = null
+
+                if (successList.length > 0) {
+                    // 构建文件
+                    event.sender.send('uploadProgress', {
+                        id: id,
+                        status: 'building'
+                    })
+
+                    outputPath = replaceLocalImageUrl(content, successList, filePath, fileName)
+
+                    if (outputPath) {
+                        // 构建完成
+                        event.sender.send('uploadProgress', {
+                            id: id,
+                            status: 'builded'
+                        })
+                    }
+                }
+
+                // 任务完成
+                event.sender.send('uploadProgress', {
+                    id: id,
+                    status: 'taskFinished',
+                    data: {
+                        isBuild: !!outputPath,
+                        outputPath: outputPath || ''
+                    }
+                })
             } catch (error) {
                 console.error('上传出错:', error)
             }
         })
 
         await Promise.all(promises)
-
-        event.sender.send('uploadProgress', 'All files processed')
     } catch (e) {
         console.error('handleUpload Error:', e)
         throw e
     }
 }
 export { uploadImage }
-
-// try {
-//     // 模拟上传过程
-//     for (let i = 0; i <= 100; i += 10) {
-//         await new Promise((resolve) => setTimeout(resolve, 100))
-//         event.sender.send('uploadProgress', i) // 主动推送进度
-//     }
-
-//     // 模拟上传完成
-//     const result = `Uploaded ${filePathList.length} files`
-//     event.sender.send('uploadProgress', result)
-//     return result
-// } catch (error) {
-//     event.sender.send('uploadProgress', error)
-//     throw error
-// }
