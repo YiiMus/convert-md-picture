@@ -1,6 +1,6 @@
-import { ipcMain, shell } from 'electron'
-import { getPackageJson, openSelectFilesDialog, closeWindow, minimizeWindow } from './utils'
-import { uploadImage } from './upload'
+import { ipcMain } from 'electron'
+import { getPackageJson, openSelectFilesDialog, closeWindow, minimizeWindow, openFolder } from './utils'
+import { uploadTask } from './uploadTask'
 
 const setupIPC = () => {
     // Close app
@@ -28,14 +28,12 @@ const setupIPC = () => {
 
     // 上传文件中的本地图片到图床
     ipcMain.handle('uploadImage', (event, filePathList) => {
-        uploadImage(event, filePathList)
+        uploadTask(event, filePathList)
     })
 
     // 打开文件夹
     ipcMain.on('openFolder', (event, filePath) => {
-        if (filePath) {
-            shell.showItemInFolder(filePath)
-        }
+        openFolder(filePath)
     })
 }
 

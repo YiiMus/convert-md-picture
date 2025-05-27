@@ -1,4 +1,4 @@
-import { app, dialog } from 'electron'
+import { app, dialog, shell } from 'electron'
 import path from 'path'
 
 const getPackageJson = () => {
@@ -40,4 +40,10 @@ const minimizeWindow = (event) => {
     }
 }
 
-export { getPackageJson, openSelectFilesDialog, closeWindow, minimizeWindow }
+const openFolder = (filePath) => {
+    if (filePath) {
+        shell.showItemInFolder(filePath)
+    }
+}
+
+export { getPackageJson, openSelectFilesDialog, closeWindow, minimizeWindow, openFolder }
