@@ -20,11 +20,20 @@ export const api = {
     // 上传文件中的本地图片到图床
     uploadImage: (filePathList) => ipcRenderer.invoke('uploadImage', filePathList),
 
-    // 上传进度
-    onUploadProgress: (callback) => ipcRenderer.on('uploadProgress', callback),
-
     // 打开文件夹
     openFolder: (filePath) => {
         ipcRenderer.send('openFolder', filePath)
-    }
+    },
+
+    // 开始任务
+    onStartTask: (callback) => ipcRenderer.on('startTask', callback),
+
+    // 上传进度
+    onUploadProgress: (callback) => ipcRenderer.on('uploadProgress', callback),
+
+    // 任务结束
+    onEndTask: (callback) => ipcRenderer.on('endTask', callback),
+
+    // 任务中止
+    onAbortTask: (callback) => ipcRenderer.on('abortTask', callback)
 }

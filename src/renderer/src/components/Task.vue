@@ -3,29 +3,36 @@
         <span class="title" :title="item.fileName">{{ item.fileName }}</span>
 
         <div class="progress">
-            <el-progress :percentage="percentage" :indeterminate="indeterminate" />
+            <el-progress
+                :percentage="percentage"
+                :indeterminate="indeterminate"
+                :status="progressStatus"
+                :format="format"
+            />
         </div>
 
         <div
-            v-if="item.status !== 'taskFinished'"
+            v-if="item.status !== TaskType.endTask && item.status !== TaskType.abortTask"
             class="status"
-            :title="$t(`task.${item.status || 'unKnown'}`)"
+            :title="$t(`task.${item.status}`)"
         >
-            {{ $t(`task.${item.status || 'unKnown'}`) }}
+            {{ $t(`task.${item.status}`) }}
         </div>
-        <div v-else class="status">
+        <div v-if="item.status === TaskType.abortTask" class="status" :title="item.data.msg">
+            {{ $t(`task.${item.status}`) }}
+        </div>
+        <div v-if="item.status === TaskType.endTask" class="status">
             <a v-if="item.data.isBuild" href="#" :title="$t('task.openFolder')" @click="handleClick">{{
-                $t(`task.${item.status || 'unKnown'}`)
+                $t(`task.${item.status}`)
             }}</a>
-            <div v-else :title="$t('task.noParsed')">
-                {{ $t('task.taskCancel') }}
-            </div>
+            <span v-else>{{ $t(`task.${item.status}`) }}</span>
         </div>
     </div>
 </template>
 
 <script setup>
 import { watchEffect, ref } from 'vue'
+import { TaskType } from '../const/TaskType'
 
 const props = defineProps({
     item: {
@@ -36,29 +43,36 @@ const props = defineProps({
 
 const percentage = ref(0)
 const indeterminate = ref(false)
+const progressStatus = ref('')
+const isShowPercentage = ref(true)
+
+const format = (percentage) => {
+    if (!isShowPercentage.value) return null
+    return `${percentage}%`
+}
 
 const handleChangeProgress = (status, data) => {
-    // 进度为 0 的状态
-    if (['waiting', 'startUpload'].includes(status)) {
-        percentage.value = 0
-        indeterminate.value = false
-    }
-
-    // 动画进度条
-    if (['parsing', 'building'].includes(status)) {
-        percentage.value = 0
+    if (TaskType.startTask === status) {
+        isShowPercentage.value = false
+        percentage.value = 25
         indeterminate.value = true
     }
 
-    // 上传中
-    if (status === 'uploading') {
+    if (TaskType.uploadProgress === status) {
+        if (!isShowPercentage.value) isShowPercentage.value = true
         percentage.value = Math.min(Math.round((data.uploadedCount / data.totalCount) * 100 * 100) / 100, 100)
     }
 
-    // 进度为  100 的状态
-    if (['parsed', 'uploaded', 'builded', 'taskFinished'].includes(status)) {
+    if (TaskType.endTask === status) {
         percentage.value = 100
         indeterminate.value = false
+        progressStatus.value = 'success'
+    }
+
+    if (TaskType.abortTask === status) {
+        percentage.value = 100
+        indeterminate.value = false
+        progressStatus.value = 'warning'
     }
 }
 
@@ -108,9 +122,6 @@ watchEffect(() => {
     .status {
         .text-overflow;
         width: 80px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
     }
 }
 </style>

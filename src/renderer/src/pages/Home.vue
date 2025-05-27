@@ -18,11 +18,10 @@
 </template>
 
 <script setup>
-// import { useI18n } from 'vue-i18n'
-// const { t } = useI18n()
 import { onMounted, ref } from 'vue'
 import { v4 as uuidV4 } from 'uuid'
 import Task from '../components/Task.vue'
+import { TaskType } from '../const/TaskType'
 
 const fileList = ref([])
 
@@ -46,14 +45,31 @@ const selectFiles = async () => {
     }
 }
 
-onMounted(async () => {
-    await window.api.onUploadProgress((event, progress) => {
-        const index = fileList.value.findIndex((item) => item.id === progress.id)
+// 更新任务状态
+const changeTaskStatus = (id, status, data) => {
+    const index = fileList.value.findIndex((item) => item.id === id)
 
-        if (index > -1) {
-            fileList.value[index].status = progress.status
-            fileList.value[index].data = progress?.data
-        }
+    if (index > -1) {
+        fileList.value[index].status = status
+        fileList.value[index].data = data
+    }
+}
+
+onMounted(async () => {
+    await window.api.onStartTask((event, progress) => {
+        changeTaskStatus(progress.id, TaskType.startTask, progress.data)
+    })
+
+    await window.api.onEndTask((event, progress) => {
+        changeTaskStatus(progress.id, TaskType.endTask, progress.data)
+    })
+
+    await window.api.onAbortTask((event, progress) => {
+        changeTaskStatus(progress.id, TaskType.abortTask, progress.data)
+    })
+
+    await window.api.onUploadProgress((event, progress) => {
+        changeTaskStatus(progress.id, TaskType.uploadProgress, progress.data)
     })
 })
 </script>

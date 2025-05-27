@@ -2,11 +2,11 @@ import fs from 'fs'
 import path from 'path'
 import axios from 'axios'
 import dayjs from 'dayjs'
+import { TaskType } from './const'
 
 /** 事件名称 */
 const EventName = {
-    // 上传进度
-    uploadProgress: 'uploadProgress'
+    ...TaskType
 }
 
 /** 发送进度事件 */
@@ -108,17 +108,20 @@ const uploadAllLocalImages = async (event, id, localImages) => {
     const total = localImages.length
 
     const tasks = localImages.map((image, i) =>
-        uploadSingleImage(image.absolutePath).then((result) => {
-            results.push({ lineIndex: image.lineIndex, requestResult: result })
-            reportProgress(event, EventName.uploadProgress, {
-                id,
-                status: 'uploading',
-                data: {
-                    totalCount: total,
-                    uploadedCount: i + 1
-                }
+        uploadSingleImage(image.absolutePath)
+            .then((result) => {
+                results.push({ lineIndex: image.lineIndex, requestResult: result })
             })
-        })
+            .finally(() => {
+                // 通知上传进度
+                reportProgress(event, EventName.uploadProgress, {
+                    id,
+                    data: {
+                        totalCount: total,
+                        uploadedCount: i + 1
+                    }
+                })
+            })
     )
 
     await Promise.all(tasks)
@@ -232,56 +235,37 @@ const writeNewFile = (content, filePath, fileName) => {
 const taskProcess = async (event, fileInfo) => {
     const { id, filePath, fileName } = fileInfo
 
-    reportProgress(event, EventName.uploadProgress, { id, status: 'parsing' })
+    // 开始任务
+    reportProgress(event, EventName.startTask, { id })
 
     const content = fs.readFileSync(filePath, 'utf-8')
     const imageInfoList = parseImageInfosFromContent(content, filePath)
-    reportProgress(event, EventName.uploadProgress, { id, status: 'parsed', data: imageInfoList })
 
     const localImageList = filterRemoteImagesAndDeduplicate(imageInfoList)
+
     if (localImageList.length === 0) {
-        reportProgress(event, EventName.uploadProgress, {
+        // 任务中止
+        reportProgress(event, EventName.abortTask, {
             id,
-            status: 'taskFinished',
             data: {
-                isBuild: false
+                msg: '没有需要上传的图片'
             }
         })
         return
     }
 
-    reportProgress(event, EventName.uploadProgress, { id, status: 'startUpload', data: imageInfoList })
     const uploadResults = await uploadAllLocalImages(event, id, localImageList)
 
     const successList = generateSuccessList(uploadResults, localImageList, imageInfoList)
-    const successCount = successList.length
-    const failureCount = uploadResults.length - successCount
 
-    reportProgress(event, EventName.uploadProgress, {
-        id,
-        status: 'uploaded',
-        data: {
-            totalCount: uploadResults.length,
-            successCount,
-            failureCount
-        }
-    })
-
-    if (successList.length === 0) {
-        reportProgress(event, id, 'taskFinished', { isBuild: false })
-        return
-    }
-
-    reportProgress(event, EventName.uploadProgress, { id, status: 'building' })
     const newContent = replaceImageUrlsInContent(content, successList)
     const outputPath = writeNewFile(newContent, filePath, fileName)
 
-    reportProgress(event, EventName.uploadProgress, { id, status: 'builded' })
-    reportProgress(event, EventName.uploadProgress, {
+    // 任务结束
+    reportProgress(event, EventName.endTask, {
         id,
-        status: 'taskFinished',
         data: {
-            isBuild: true,
+            isBuild: !!outputPath,
             outputPath
         }
     })
