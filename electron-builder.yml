@@ -13,6 +13,8 @@ asarUnpack:
 win:
   executableName: convert-md-picture
 nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true # 允许用户选择安装目录
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}

@@ -64,6 +64,8 @@ const handleClick = (path) => {
 }
 
 onMounted(() => {
+    router.push(routerList[0].path)
+
     appInfoStore.handleChangeActiveRoute(routerList[0].path)
     appInfoStore.handleChangeCurrentTitle(routerList[0].title)
 })

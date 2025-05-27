@@ -3,7 +3,7 @@ import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
-export function createWindow() {
+const createWindow = () => {
     const mainWindow = new BrowserWindow({
         width: 860,
         height: 580,
@@ -51,3 +51,5 @@ export function createWindow() {
 
     return mainWindow
 }
+
+export { createWindow }

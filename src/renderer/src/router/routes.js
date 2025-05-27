@@ -1,15 +1,19 @@
+import Home from '../pages/Home.vue'
+import Setting from '../pages/Setting.vue'
+import About from '../pages/About.vue'
+
 const routes = [
     {
         path: '/',
-        component: () => import('../pages/Home.vue')
+        component: Home
     },
     {
         path: '/setting',
-        component: () => import('../pages/Setting.vue')
+        component: Setting
     },
     {
         path: '/about',
-        component: () => import('../pages/About.vue')
+        component: About
     }
 ]
 

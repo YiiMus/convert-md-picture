@@ -14,6 +14,7 @@ const handleUpload = async (imageUrl) => {
                 list: [imageUrl]
             })
         )
+
         return result.data
     } catch (e) {
         console.error(e)
