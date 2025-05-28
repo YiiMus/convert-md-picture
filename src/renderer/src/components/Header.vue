@@ -17,7 +17,8 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
 import { CloseOutlined, MinusOutlined } from '@ant-design/icons-vue'
-import { useAppInfoStore } from '../stores/appInfo'
+import { useAppInfoStore } from '@renderer/stores/appInfo'
+
 const appInfoStore = useAppInfoStore()
 const { t } = useI18n()
 

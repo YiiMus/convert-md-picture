@@ -30,8 +30,9 @@
 import { useI18n } from 'vue-i18n'
 import { UserOutlined } from '@ant-design/icons-vue'
 import { useRouter } from 'vue-router'
-import { useAppInfoStore } from '../stores/appInfo'
+import { useAppInfoStore } from '@renderer/stores/appInfo'
 import { onMounted } from 'vue'
+
 const appInfoStore = useAppInfoStore()
 
 const { t } = useI18n()

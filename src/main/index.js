@@ -1,7 +1,7 @@
 import { app } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
-import { createWindow } from './window'
-import { setupIPC } from './ipc'
+import { createWindow } from '@main/core/window'
+import { setupIPC } from '@main/core/ipc'
 
 app.whenReady().then(() => {
     electronApp.setAppUserModelId('com.nanoopic')

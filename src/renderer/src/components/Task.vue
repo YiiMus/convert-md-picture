@@ -32,7 +32,7 @@
 
 <script setup>
 import { watchEffect, ref } from 'vue'
-import { TaskType } from '../const/TaskType'
+import { TaskType } from '@renderer/const/TaskType'
 
 const props = defineProps({
     item: {
@@ -111,7 +111,7 @@ watchEffect(() => {
 
     .title {
         .text-overflow;
-        max-width: 230px;
+        width: 180px;
     }
 
     .progress {

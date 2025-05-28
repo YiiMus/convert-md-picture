@@ -1,5 +1,5 @@
 import { contextBridge } from 'electron'
-import { api } from './api'
+import { api } from '@preload/api'
 
 if (process.contextIsolated) {
     try {

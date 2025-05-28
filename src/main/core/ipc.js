@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron'
-import { getPackageJson, openSelectFilesDialog, closeWindow, minimizeWindow, openFolder } from './utils'
-import { uploadTask } from './uploadTask'
+import { getPackageJson, openSelectFilesDialog, closeWindow, minimizeWindow, openFolder } from '@main/utils'
+import { uploadTask } from '@main/services/uploadTask'
 
 const setupIPC = () => {
     // Close app

@@ -1,6 +1,6 @@
-import Home from '../pages/Home.vue'
-import Setting from '../pages/Setting.vue'
-import About from '../pages/About.vue'
+import Home from '@renderer/pages/Home.vue'
+import Setting from '@renderer/pages/Setting.vue'
+import About from '@renderer/pages/About.vue'
 
 const routes = [
     {

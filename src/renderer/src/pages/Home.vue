@@ -20,8 +20,8 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { v4 as uuidV4 } from 'uuid'
-import Task from '../components/Task.vue'
-import { TaskType } from '../const/TaskType'
+import Task from '@renderer/components/Task.vue'
+import { TaskType } from '@renderer/const/TaskType'
 
 const fileList = ref([])
 

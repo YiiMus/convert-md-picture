@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import axios from 'axios'
 import dayjs from 'dayjs'
-import { TaskType } from './const'
+import { TaskType } from '@main/const'
 
 /** 事件名称 */
 const EventName = {
