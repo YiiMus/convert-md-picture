@@ -106,19 +106,22 @@ const uploadSingleImage = async (absolutePath) => {
 const uploadAllLocalImages = async (event, id, localImages) => {
     const results = []
     const total = localImages.length
+    let uploadedCount = 0
 
-    const tasks = localImages.map((image, i) =>
+    const tasks = localImages.map((image) =>
         uploadSingleImage(image.absolutePath)
             .then((result) => {
                 results.push({ lineIndex: image.lineIndex, requestResult: result })
             })
             .finally(() => {
+                uploadedCount++
+
                 // 通知上传进度
                 reportProgress(event, EventName.uploadProgress, {
                     id,
                     data: {
                         totalCount: total,
-                        uploadedCount: i + 1
+                        uploadedCount
                     }
                 })
             })
