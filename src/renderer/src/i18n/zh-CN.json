@@ -13,5 +13,7 @@
     "task.startTask": "开始任务",
     "task.uploadProgress": "上传中",
     "task.endTask": "任务结束",
-    "task.abortTask": "任务中止"
+    "task.abortTask": "任务中止",
+    "task.unknownError": "未知错误",
+    "task.uploadAddressError": "上传地址错误"
 }

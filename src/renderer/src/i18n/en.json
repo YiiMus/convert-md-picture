@@ -13,5 +13,7 @@
     "task.startTask": "Start task",
     "task.uploadProgress": "Uploading",
     "task.endTask": "End task",
-    "task.abortTask": "Abort task"
+    "task.abortTask": "Abort task",
+    "task.unknownError": "Unknown error",
+    "task.uploadAddressError": "Upload address error"
 }

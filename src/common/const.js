@@ -11,6 +11,15 @@ const TaskStatus = {
     abortTask: 'abortTask'
 }
 
+const TaskErrorEnum = {
+    // 没有要上传的文件
+    noParsed: 'noParsed',
+    // 未知错误
+    unknownError: 'unknownError',
+    // 上传地址错误
+    uploadAddressError: 'uploadAddressError'
+}
+
 // Renderer -> Main
 const RendererToMainEvent = {
     // 最小化应用
@@ -33,4 +42,4 @@ const MainToRendererEvent = {
     taskNotify: 'taskNotify'
 }
 
-export { TaskStatus, RendererToMainEvent, MainToRendererEvent }
+export { TaskStatus, TaskErrorEnum, RendererToMainEvent, MainToRendererEvent }

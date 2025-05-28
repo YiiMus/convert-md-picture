@@ -18,7 +18,11 @@
         >
             {{ $t(`task.${item.status}`) }}
         </div>
-        <div v-if="item.status === TaskStatus.abortTask" class="status" :title="item.data.msg">
+        <div
+            v-if="item.status === TaskStatus.abortTask"
+            class="status error"
+            :title="$t(`task.${item.data.error}`)"
+        >
             {{ $t(`task.${item.status}`) }}
         </div>
         <div v-if="item.status === TaskStatus.endTask" class="status">
@@ -45,6 +49,7 @@ const percentage = ref(0)
 const indeterminate = ref(false)
 const progressStatus = ref('')
 const isShowPercentage = ref(true)
+const isAbort = ref(false)
 
 const format = (percentage) => {
     if (!isShowPercentage.value) return null
@@ -52,6 +57,8 @@ const format = (percentage) => {
 }
 
 const handleChangeProgress = (status, data) => {
+    if (isAbort.value) return
+
     if (TaskStatus.startTask === status) {
         isShowPercentage.value = false
         percentage.value = 25
@@ -73,6 +80,7 @@ const handleChangeProgress = (status, data) => {
         percentage.value = 100
         indeterminate.value = false
         progressStatus.value = 'warning'
+        isAbort.value = true
     }
 }
 
@@ -122,6 +130,10 @@ watchEffect(() => {
     .status {
         .text-overflow;
         width: 80px;
+    }
+
+    .error {
+        color: #d63031;
     }
 }
 </style>

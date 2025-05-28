@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import axios from 'axios'
 import dayjs from 'dayjs'
-import { TaskStatus, MainToRendererEvent } from '@/src/common/const'
+import { TaskStatus, MainToRendererEvent, TaskErrorEnum } from '@/src/common/const'
 
 /** 发送进度事件 */
 const reportProgress = (event, status, params) => {
@@ -92,8 +92,9 @@ const uploadSingleImage = async (absolutePath) => {
         )
         return result.data
     } catch (e) {
-        console.error('上传失败:', e)
-        return { success: false }
+        if (e.message.includes('Invalid URL')) {
+            throw new Error(TaskErrorEnum.uploadAddressError)
+        }
     }
 }
 
@@ -233,40 +234,54 @@ const writeNewFile = (content, filePath, fileName) => {
 const taskProcess = async (event, fileInfo) => {
     const { id, filePath, fileName } = fileInfo
 
-    // 开始任务
-    reportProgress(event, TaskStatus.startTask, { id })
+    try {
+        // 开始任务
+        reportProgress(event, TaskStatus.startTask, { id })
 
-    const content = fs.readFileSync(filePath, 'utf-8')
-    const imageInfoList = parseImageInfosFromContent(content, filePath)
+        const content = fs.readFileSync(filePath, 'utf-8')
+        const imageInfoList = parseImageInfosFromContent(content, filePath)
 
-    const localImageList = filterRemoteImagesAndDeduplicate(imageInfoList)
+        const localImageList = filterRemoteImagesAndDeduplicate(imageInfoList)
 
-    if (localImageList.length === 0) {
+        if (localImageList.length === 0) {
+            // 任务中止
+            reportProgress(event, TaskStatus.abortTask, {
+                id,
+                data: {
+                    error: TaskErrorEnum.noParsed
+                }
+            })
+            return
+        }
+
+        const uploadResults = await uploadAllLocalImages(event, id, localImageList)
+
+        const successList = generateSuccessList(uploadResults, localImageList, imageInfoList)
+
+        const newContent = replaceImageUrlsInContent(content, successList)
+        const outputPath = writeNewFile(newContent, filePath, fileName)
+
+        // 任务结束
+        reportProgress(event, TaskStatus.endTask, {
+            id,
+            data: {
+                isBuild: !!outputPath,
+                outputPath
+            }
+        })
+    } catch (e) {
+        console.error(e)
+
         // 任务中止
         reportProgress(event, TaskStatus.abortTask, {
             id,
             data: {
-                msg: '没有需要上传的图片'
+                error: Object.values(TaskErrorEnum).includes(e.message)
+                    ? e.message
+                    : TaskErrorEnum.unknownError
             }
         })
-        return
     }
-
-    const uploadResults = await uploadAllLocalImages(event, id, localImageList)
-
-    const successList = generateSuccessList(uploadResults, localImageList, imageInfoList)
-
-    const newContent = replaceImageUrlsInContent(content, successList)
-    const outputPath = writeNewFile(newContent, filePath, fileName)
-
-    // 任务结束
-    reportProgress(event, TaskStatus.endTask, {
-        id,
-        data: {
-            isBuild: !!outputPath,
-            outputPath
-        }
-    })
 }
 
 /** 上传任务入口函数 */
@@ -276,7 +291,6 @@ const uploadTask = async (event, fileList = []) => {
         await Promise.all(promises)
     } catch (e) {
         console.error('handleUpload Error:', e)
-        throw e
     }
 }
 
