@@ -9,6 +9,7 @@
     "task.noParsed": "未解析出本地图片",
     "task.taskCancel": "任务取消",
     "task.openFolder": "打开文件所在位置",
+    "task.waiting": "等待中",
     "task.startTask": "开始任务",
     "task.uploadProgress": "上传中",
     "task.endTask": "任务结束",

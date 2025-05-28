@@ -21,7 +21,7 @@
 import { onMounted, ref } from 'vue'
 import { v4 as uuidV4 } from 'uuid'
 import Task from '@renderer/components/Task.vue'
-import { TaskType } from '@renderer/const/TaskType'
+import { TaskStatus } from '@/src/common/const'
 
 const fileList = ref([])
 
@@ -33,7 +33,7 @@ const selectFiles = async () => {
             id: uuidV4(),
             fileName: item.fileName,
             filePath: item.filePath,
-            status: 'waiting'
+            status: TaskStatus.waiting
         }
     })
 
@@ -46,7 +46,9 @@ const selectFiles = async () => {
 }
 
 // 更新任务状态
-const changeTaskStatus = (id, status, data) => {
+const changeTaskStatus = (status, params) => {
+    const { id, data } = params
+
     const index = fileList.value.findIndex((item) => item.id === id)
 
     if (index > -1) {
@@ -56,20 +58,8 @@ const changeTaskStatus = (id, status, data) => {
 }
 
 onMounted(async () => {
-    await window.api.onStartTask((event, progress) => {
-        changeTaskStatus(progress.id, TaskType.startTask, progress.data)
-    })
-
-    await window.api.onEndTask((event, progress) => {
-        changeTaskStatus(progress.id, TaskType.endTask, progress.data)
-    })
-
-    await window.api.onAbortTask((event, progress) => {
-        changeTaskStatus(progress.id, TaskType.abortTask, progress.data)
-    })
-
-    await window.api.onUploadProgress((event, progress) => {
-        changeTaskStatus(progress.id, TaskType.uploadProgress, progress.data)
+    await window.api.onTaskNotify((event, status, params) => {
+        changeTaskStatus(status, params)
     })
 })
 </script>

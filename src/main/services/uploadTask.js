@@ -2,16 +2,11 @@ import fs from 'fs'
 import path from 'path'
 import axios from 'axios'
 import dayjs from 'dayjs'
-import { TaskType } from '@main/const'
-
-/** 事件名称 */
-const EventName = {
-    ...TaskType
-}
+import { TaskStatus, MainToRendererEvent } from '@/src/common/const'
 
 /** 发送进度事件 */
-const reportProgress = (event, eventName, params) => {
-    event.sender.send(eventName, params)
+const reportProgress = (event, status, params) => {
+    event.sender.send(MainToRendererEvent.taskNotify, status, params)
 }
 
 /** 创建 Markdown 图片正则 */
@@ -117,7 +112,7 @@ const uploadAllLocalImages = async (event, id, localImages) => {
                 uploadedCount++
 
                 // 通知上传进度
-                reportProgress(event, EventName.uploadProgress, {
+                reportProgress(event, TaskStatus.uploadProgress, {
                     id,
                     data: {
                         totalCount: total,
@@ -239,7 +234,7 @@ const taskProcess = async (event, fileInfo) => {
     const { id, filePath, fileName } = fileInfo
 
     // 开始任务
-    reportProgress(event, EventName.startTask, { id })
+    reportProgress(event, TaskStatus.startTask, { id })
 
     const content = fs.readFileSync(filePath, 'utf-8')
     const imageInfoList = parseImageInfosFromContent(content, filePath)
@@ -248,7 +243,7 @@ const taskProcess = async (event, fileInfo) => {
 
     if (localImageList.length === 0) {
         // 任务中止
-        reportProgress(event, EventName.abortTask, {
+        reportProgress(event, TaskStatus.abortTask, {
             id,
             data: {
                 msg: '没有需要上传的图片'
@@ -265,7 +260,7 @@ const taskProcess = async (event, fileInfo) => {
     const outputPath = writeNewFile(newContent, filePath, fileName)
 
     // 任务结束
-    reportProgress(event, EventName.endTask, {
+    reportProgress(event, TaskStatus.endTask, {
         id,
         data: {
             isBuild: !!outputPath,

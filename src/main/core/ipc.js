@@ -1,25 +1,26 @@
 import { ipcMain } from 'electron'
 import { getPackageJson, openSelectFilesDialog, closeWindow, minimizeWindow, openFolder } from '@main/utils'
 import { uploadTask } from '@main/services/uploadTask'
+import { RendererToMainEvent } from '@/src/common/const'
 
 const setupIPC = () => {
     // Close app
-    ipcMain.on('closeApp', (event) => {
+    ipcMain.on(RendererToMainEvent.closeApp, (event) => {
         closeWindow(event)
     })
 
     // Minimize app
-    ipcMain.on('minimize', (event) => {
+    ipcMain.on(RendererToMainEvent.minimize, (event) => {
         minimizeWindow(event)
     })
 
     // 获取 package.json
-    ipcMain.handle('getPackageJson', () => {
+    ipcMain.handle(RendererToMainEvent.getPackageJson, () => {
         return getPackageJson()
     })
 
     // 选择文件
-    ipcMain.handle('selectFiles', async () => {
+    ipcMain.handle(RendererToMainEvent.selectFiles, async () => {
         return await openSelectFilesDialog({
             properties: ['openFile', 'multiSelections'],
             filters: [{ name: 'Markdown Files', extensions: ['md'] }]
@@ -27,12 +28,12 @@ const setupIPC = () => {
     })
 
     // 上传文件中的本地图片到图床
-    ipcMain.handle('uploadImage', (event, filePathList) => {
+    ipcMain.handle(RendererToMainEvent.uploadImage, (event, filePathList) => {
         uploadTask(event, filePathList)
     })
 
     // 打开文件夹
-    ipcMain.on('openFolder', (event, filePath) => {
+    ipcMain.on(RendererToMainEvent.openFolder, (event, filePath) => {
         openFolder(filePath)
     })
 }

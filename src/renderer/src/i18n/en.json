@@ -9,6 +9,7 @@
     "task.noParsed": "Unresolved local images",
     "task.taskCancel": "Task cancelled",
     "task.openFolder": "Open the file location",
+    "task.waiting": "waiting",
     "task.startTask": "Start task",
     "task.uploadProgress": "Uploading",
     "task.endTask": "End task",

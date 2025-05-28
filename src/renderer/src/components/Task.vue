@@ -12,16 +12,16 @@
         </div>
 
         <div
-            v-if="item.status !== TaskType.endTask && item.status !== TaskType.abortTask"
+            v-if="item.status !== TaskStatus.endTask && item.status !== TaskStatus.abortTask"
             class="status"
             :title="$t(`task.${item.status}`)"
         >
             {{ $t(`task.${item.status}`) }}
         </div>
-        <div v-if="item.status === TaskType.abortTask" class="status" :title="item.data.msg">
+        <div v-if="item.status === TaskStatus.abortTask" class="status" :title="item.data.msg">
             {{ $t(`task.${item.status}`) }}
         </div>
-        <div v-if="item.status === TaskType.endTask" class="status">
+        <div v-if="item.status === TaskStatus.endTask" class="status">
             <a v-if="item.data.isBuild" href="#" :title="$t('task.openFolder')" @click="handleClick">{{
                 $t(`task.${item.status}`)
             }}</a>
@@ -32,7 +32,7 @@
 
 <script setup>
 import { watchEffect, ref } from 'vue'
-import { TaskType } from '@renderer/const/TaskType'
+import { TaskStatus } from '@common/const'
 
 const props = defineProps({
     item: {
@@ -52,24 +52,24 @@ const format = (percentage) => {
 }
 
 const handleChangeProgress = (status, data) => {
-    if (TaskType.startTask === status) {
+    if (TaskStatus.startTask === status) {
         isShowPercentage.value = false
         percentage.value = 25
         indeterminate.value = true
     }
 
-    if (TaskType.uploadProgress === status) {
+    if (TaskStatus.uploadProgress === status) {
         if (!isShowPercentage.value) isShowPercentage.value = true
         percentage.value = Math.min(Math.round((data.uploadedCount / data.totalCount) * 100 * 100) / 100, 100)
     }
 
-    if (TaskType.endTask === status) {
+    if (TaskStatus.endTask === status) {
         percentage.value = 100
         indeterminate.value = false
         progressStatus.value = 'success'
     }
 
-    if (TaskType.abortTask === status) {
+    if (TaskStatus.abortTask === status) {
         percentage.value = 100
         indeterminate.value = false
         progressStatus.value = 'warning'
