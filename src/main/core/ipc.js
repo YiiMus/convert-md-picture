@@ -1,5 +1,11 @@
 import { ipcMain } from 'electron'
-import { getPackageJson, openSelectFilesDialog, closeWindow, minimizeWindow, openFolder } from '@main/utils'
+import {
+    getPackageJson,
+    openSelectFilesDialog,
+    closeWindow,
+    minimizeWindow,
+    openFolder
+} from '@/src/main/utils'
 import { uploadTask } from '@main/services/uploadTask'
 import { RendererToMainEvent } from '@/src/common/const'
 
